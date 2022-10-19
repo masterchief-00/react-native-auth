@@ -2,12 +2,29 @@ import { View, Text, Button, TextInput } from "react-native";
 import { Formik } from "formik";
 import React from "react";
 import CustomButton from "./CustomButton";
+import axios from "axios";
+import { BASE_URL } from "@env";
 
-export default function Login({navigation}) {
+export default function Login({ navigation }) {
   return (
     <Formik
       initialValues={{ email: "", password: "" }}
-      onSubmit={(values) => console.log(values)}
+      onSubmit={(values, { resetForm }) => {
+        if (values.email !== "" && values.password !== "") {
+          axios
+            .post(`${BASE_URL}/api/login`, {
+              email: values.email,
+              password: values.password,
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                alert("Login successful!");
+                resetForm();
+              }
+            })
+            .catch((error) => console.log(error));
+        }
+      }}
     >
       {({ handleChange, handleBlur, handleSubmit, values }) => (
         <View
@@ -70,6 +87,7 @@ export default function Login({navigation}) {
               onBlur={handleBlur("password")}
               value={values.password}
               placeholder="********"
+              secureTextEntry={true}
               style={{
                 fontSize: 18,
                 marginBottom: 5,
@@ -91,7 +109,7 @@ export default function Login({navigation}) {
               bg="#fff"
               color="#5486b4"
               text="Register"
-              onPress={()=>navigation.navigate('Register')}
+              onPress={() => navigation.navigate("Register")}
             />
           </View>
         </View>

@@ -1,13 +1,37 @@
-import { View, Text, Button, TextInput } from "react-native";
+import { View, Text, TextInput } from "react-native";
 import { Formik } from "formik";
 import React from "react";
 import CustomButton from "./CustomButton";
+import axios from "axios";
+import * as Device from "expo-device";
+import { BASE_URL } from "@env";
 
-export default function Register({navigation}) {
+export default function Register({ navigation }) {
   return (
     <Formik
-      initialValues={{ email: "", password: "", names: "", address: "" }}
-      onSubmit={(values) => console.log(values)}
+      initialValues={{ email: "", password: "", names: "" }}
+      onSubmit={(values, { resetForm }) => {
+        if (
+          values.names !== "" &&
+          values.email !== "" &&
+          values.password !== ""
+        ) {
+          axios
+            .post(`${BASE_URL}/api/register`, {
+              email: values.email,
+              password: values.password,
+              names: values.names,
+              deviceName: Device.designName,
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                alert("User registered!");
+                resetForm();
+              }
+            })
+            .catch((error) => console.log(error.message));
+        }
+      }}
     >
       {({ handleChange, handleBlur, handleSubmit, values }) => (
         <View
@@ -55,32 +79,7 @@ export default function Register({navigation}) {
                 width: "100%",
               }}
             />
-            <Text
-              style={{
-                alignSelf: "flex-start",
-                fontSize: 18,
-                fontWeight: "bold",
-                marginBottom: 10,
-              }}
-            >
-              Address
-            </Text>
-            <TextInput
-              onChangeText={handleChange("address")}
-              onBlur={handleBlur("address")}
-              value={values.address}
-              placeholder="Kimisagara"
-              style={{
-                fontSize: 18,
-                marginBottom: 5,
-                borderWidth: 1,
 
-                padding: 10,
-                borderRadius: 5,
-                borderColor: "#ddd",
-                width: "100%",
-              }}
-            />
             <Text
               style={{
                 alignSelf: "flex-start",
@@ -122,6 +121,8 @@ export default function Register({navigation}) {
               onBlur={handleBlur("password")}
               value={values.password}
               placeholder="********"
+              textContentType="password"
+              secureTextEntry={true}
               style={{
                 fontSize: 18,
                 marginBottom: 5,
